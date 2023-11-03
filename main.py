@@ -22,4 +22,15 @@ url = f"http://dataservice.accuweather.com/locations/v1/cities/ipaddress?q={ip}&
 
 response = requests.get(url)
 
-conditionsUrl = f""
+location_data = response.json()
+location_key = location_data['Key']
+
+print(location_key)
+
+conditionsUrl = f"http://dataservice.accuweather.com/currentconditions/v1/{location_key}?apikey={api_key}"
+
+conditionsResponse = requests.get(conditionsUrl)
+
+conditions_data = conditionsResponse.json()
+
+print(conditions_data)
