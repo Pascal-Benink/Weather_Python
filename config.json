@@ -1,5 +1,6 @@
 {
   "max_bike_distance": "5km",
   "max_bike_temp": "25",
-  "min_bike_temp": "-5"
+  "min_bike_temp": "-5",
+  "max_wind_speed": "7"
 }
