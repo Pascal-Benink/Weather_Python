@@ -28,8 +28,8 @@ def get_weather_from_ip():
     }
 
     response = requests.get(url)
-    # location_data = response.json()
-    print(url)
+    location_data = response.json()
+    print(location_data)
     exit()
 
     location_key = location_data['Key']
