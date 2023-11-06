@@ -98,7 +98,7 @@ def chk_temp(current_temp, maxtemp, mintemp):
 
 # chk_temp(current_float_temp, max_bike_temp, min_bike_temp)
 
-distance = '1km'
+distance = config_data["bike_distance"]
 
 def chk_bike_distance(distance, max_bike_distance):
     if distance <= max_bike_distance:
