@@ -2,3 +2,5 @@
 .env
 
 storage
+
+mock-server/node_modules
