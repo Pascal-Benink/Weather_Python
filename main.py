@@ -6,24 +6,6 @@ import requests
 from requests import get
 load_dotenv()
 
-def chk_temp(current_temp, maxtemp, mintemp):
-    if current_temp >= mintemp:
-        mintemp_chk = True
-    else:
-        mintemp_chk = False
-
-    if current_temp <= maxtemp:
-        maxtemp_chk = True
-    else:
-        maxtemp_chk = False
-
-    if maxtemp_chk == True and mintemp_chk == True:
-        return True
-
-# chk_temp(current_float_temp, max_bike_temp, min_bike_temp)
-
-distance = config_data["bike_distance"]
-
 def get_weather_from_ip():
     with open('config.json', 'r') as config_file:
         config_data = json.load(config_file)
@@ -63,6 +45,8 @@ def get_weather_from_ip():
     max_bike_temp = float(max_bike_temp)
     min_bike_temp = float(min_bike_temp)
 
+    distance = config_data["bike_distance"]
+
     current_time = datetime.datetime.now()
     formatted_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
 
@@ -79,7 +63,21 @@ def get_weather_from_ip():
         "Saved_at": formatted_time,
     }
 
-    print(response_data)
+    return response_data
+
+def chk_temp(current_temp, maxtemp, mintemp):
+    if current_temp >= mintemp:
+        mintemp_chk = True
+    else:
+        mintemp_chk = False
+
+    if current_temp <= maxtemp:
+        maxtemp_chk = True
+    else:
+        maxtemp_chk = False
+
+    if maxtemp_chk == True and mintemp_chk == True:
+        return True
 
 def chk_bike_distance(distance, max_bike_distance):
     if distance <= max_bike_distance:
@@ -93,3 +91,4 @@ def chk_bike(temp, distance):
 
 if __name__ == '__main__':
     weather = get_weather_from_ip()
+    print(weather)
