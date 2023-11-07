@@ -16,19 +16,14 @@ def get_weather_from_ip():
 
     ip = get('https://api.ipify.org').content.decode('utf8')
 
-    location_key = ""
     api_key = os.getenv("API_KEY")
     api_url_base = os.getenv("API_URL")
 
-    url = f"{api_url_base}/locations/v1/cities/ipaddress"
+    url = f"{api_url_base}/locations/v1/cities/ipaddress?apikey={api_key}&q={ip}"
 
-    params = {
-        'api_key': api_key,
-        'q': ip
-    }
-
-    response = requests.get(url, params=params)
-    location_data = response.json()
+    response = requests.get(url)
+    location_data_unformatted = response.json()
+    location_data = [location_data_unformatted]
 
     location_key = location_data[0]['Key']
     conditions_url = f"{api_url_base}/currentconditions/v1/{location_key}"
