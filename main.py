@@ -27,14 +27,15 @@ def get_weather_from_ip():
         'q': ip
     }
 
-    response = requests.get(url)
+    response = requests.get(url, params=params)
     location_data = response.json()
-    print(location_data)
-    exit()
 
-    location_key = location_data['Key']
-    conditionsUrl = f"{api_url_base}/currentconditions/v1/{location_key}?apikey={api_key}"
-    conditionsResponse = requests.get(conditionsUrl)
+    location_key = location_data[0]['Key']
+    conditions_url = f"{api_url_base}/currentconditions/v1/{location_key}"
+    conditions_params = {
+        'apikey': api_key
+    }
+    conditionsResponse = requests.get(conditions_url, params=conditions_params)
     conditions_data = conditionsResponse.json()
 
     current_weather = conditions_data[0]['WeatherText']
