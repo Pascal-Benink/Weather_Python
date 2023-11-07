@@ -1,4 +1,4 @@
-# NASCAR_Python
+# Weather_python
 
 # How to install
 To install you need docker on your pc\
