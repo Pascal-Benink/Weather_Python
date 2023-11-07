@@ -35,10 +35,8 @@ def get_weather_from_ip():
     conditions_params = {
         'apikey': api_key
     }
-    print(location_data)
+
     conditionsResponse = requests.get(conditions_url, params=conditions_params)
-    response_text = conditionsResponse.text
-    print(conditionsResponse)
     conditions_data = conditionsResponse.json()
 
     current_weather = conditions_data[0]['WeatherText']
