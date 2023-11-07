@@ -35,14 +35,17 @@ def get_weather_from_ip():
     conditions_params = {
         'apikey': api_key
     }
+    print(location_data)
     conditionsResponse = requests.get(conditions_url, params=conditions_params)
+    response_text = conditionsResponse.text
+    print(conditionsResponse)
     conditions_data = conditionsResponse.json()
 
     current_weather = conditions_data[0]['WeatherText']
     current_weather_ic = conditions_data[0]['WeatherIcon']
     current_temp = conditions_data[0]['Temperature']['Metric']['Value']
-    lat = location_data['GeoPosition']['Latitude']
-    lon = location_data['GeoPosition']['Longitude']
+    lat = location_data[0]['GeoPosition']['Latitude']
+    lon = location_data[0]['GeoPosition']['Longitude']
     current_float_temp = float(current_temp)
 
     max_bike_temp = float(max_bike_temp)
