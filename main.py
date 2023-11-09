@@ -14,13 +14,20 @@ api_url_base = os.getenv("API_URL")
 
 
 def get_ip():
-    return get('https://api.ipify.org').content.decode('utf8')
+    try:
+        ip = get('https://api.ipify.org').content.decode('utf8')
+    except requests.exceptions.HTTPError as ce:
+        print(f"Connection Problem: {ce}")
+    return ip
 
 
 def get_location_from_ip_api(ip, api_key, api_url_base):
     url = f"{api_url_base}/locations/v1/cities/ipaddress?apikey={api_key}&q={ip}"
 
-    response = requests.get(url)
+    try:
+        response = requests.get(url)
+    except requests.exceptions.HTTPError as ce:
+        print(f"Connection Problem: {ce}")
     location_data_unformatted = response.json()
     return [location_data_unformatted]
 
@@ -31,16 +38,23 @@ def get_weather_from_location_api(location_key, api_key, api_url_base):
         'apikey': api_key
     }
 
-    conditionsResponse = requests.get(conditions_url, params=conditions_params)
+    try:
+        conditionsResponse = requests.get(conditions_url, params=conditions_params)
+    except requests.exceptions.HTTPError as ce:
+        print(f"Connection Problem: {ce}")
+
     return conditionsResponse.json()
 
 
 def get_time_from_db():
     if sql_client.check_table_exists("weather_table"):
-        time = sql_client.fetch_all(
-            "SELECT saved_at FROM weather_table WHERE `id` = (SELECT MAX(`id`) FROM weather_table);"
-        )
-        time = time[0]  # Assuming there's only one dictionary in the list
+        try:
+            time = sql_client.fetch_all(
+                "SELECT saved_at FROM weather_table WHERE `id` = (SELECT MAX(`id`) FROM weather_table);"
+            )
+            time = time[0]  # Assuming there's only one dictionary in the list
+        except Exception as e:
+            print(f"Error: {e}")
         return time['saved_at']
     else:
         return "1970-01-01 00:00:00"
@@ -48,9 +62,13 @@ def get_time_from_db():
 
 def get_weather_from_db():
     if check_tabel_existence:
-        return sql_client.fetch_all(
-            "SELECT * FROM weather_table WHERE `id` = (SELECT MAX(`id`) FROM weather_table);"
-        )
+        try:
+            data = sql_client.fetch_all(
+                "SELECT * FROM weather_table WHERE `id` = (SELECT MAX(`id`) FROM weather_table);"
+            )
+        except Exception as e:
+            print(f"Error: {e}")
+        return data
 
 
 def api_response(formatted_current_time, max_bike_distance, max_bike_temp, min_bike_temp, config_data):
