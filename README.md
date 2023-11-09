@@ -1,6 +1,6 @@
 # Weather_python
 
-# How to install
+## How to install
 To install you need docker on your pc\
 docker download:https://www.docker.com/products/docker-desktop/ \
 Python 3.12 is needed \
@@ -15,3 +15,10 @@ if you meet all the requirements the procedure is the following
 
 Now you have the script running and you can see if the weather is bikeble for you
 you can also change the bikable parameters in config.json if you want to
+
+## What is this app
+This app is a checker to check if the weather is bikeable by you standards. you can chamnge the parameters in the config.json.
+The app uses the following api routes:
+/locations/v1/cities/ipaddress to check if at the location of your ipaddress the weather is bikeable by your standards.
+/currentconditions/v1/ to see if the water is bikeale at the location above
+
