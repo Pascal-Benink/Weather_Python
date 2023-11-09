@@ -17,8 +17,10 @@ Now you have the script running and you can see if the weather is bikeble for yo
 you can also change the bikable parameters in config.json if you want to
 
 ## What is this app
-This app is a checker to check if the weather is bikeable by you standards. you can chamnge the parameters in the config.json.
+This app is a checker to check if the weather is bikeable by you standards. you can change the parameters in the config.json.
 The app uses the following api routes:
 /locations/v1/cities/ipaddress to check if at the location of your ipaddress the weather is bikeable by your standards.
 /currentconditions/v1/ to see if the water is bikeale at the location above
 
+## Connections
+you can connect to the api via:http://127.0.0.1:5000/
