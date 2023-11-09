@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 import requests
 from requests import get
+from flask import Flask, jsonify
 
 from sql_client import SQLClient
 
@@ -11,6 +12,9 @@ load_dotenv()
 sql_client = SQLClient()
 api_key = os.getenv("API_KEY")
 api_url_base = os.getenv("API_URL")
+
+app = Flask(__name__)
+
 
 
 def get_ip():
@@ -149,7 +153,7 @@ def db_response(max_bike_distance, max_bike_temp, min_bike_temp, config_data):
     }
     return response_data
 
-
+@app.route('/', methods=['GET'])
 def get_weather_from_ip_main():
     with open('config.json', 'r') as config_file:
         config_data = json.load(config_file)
@@ -242,6 +246,6 @@ def check_bike(temp, distance):
         return False
 
 
+
 if __name__ == '__main__':
-    weather = get_weather_from_ip_main()
-    print(weather)
+    app.run(debug=True)
