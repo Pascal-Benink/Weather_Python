@@ -16,6 +16,31 @@ api_url_base = os.getenv("API_URL")
 app = Flask(__name__)
 
 
+@app.route('/', methods=['GET'])
+def get_weather_from_ip_main():
+    with open('config.json', 'r') as config_file:
+        config_data = json.load(config_file)
+
+    current_time = datetime.datetime.now()
+    one_hour_ago = current_time - datetime.timedelta(hours=1)
+
+    formatted_current_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
+    formatted_one_hour_ago = one_hour_ago.strftime("%Y-%m-%d %H:%M:%S")
+
+    max_bike_distance = config_data["max_bike_distance"]
+    max_bike_temp = config_data["max_bike_temp"]
+    min_bike_temp = config_data["min_bike_temp"]
+
+    time_data_db = get_time_from_db()
+
+    if not time_data_db >= formatted_one_hour_ago:
+        response_data = api_response(formatted_current_time, max_bike_distance, max_bike_temp, min_bike_temp,
+                                     config_data)
+    else:
+        response_data = db_response(max_bike_distance, max_bike_temp, min_bike_temp, config_data)
+
+    return response_data
+
 
 def get_ip():
     try:
@@ -151,31 +176,6 @@ def db_response(max_bike_distance, max_bike_temp, min_bike_temp, config_data):
         "longitude": lon,
         "saved_at": saved_at,
     }
-    return response_data
-
-@app.route('/', methods=['GET'])
-def get_weather_from_ip_main():
-    with open('config.json', 'r') as config_file:
-        config_data = json.load(config_file)
-
-    current_time = datetime.datetime.now()
-    one_hour_ago = current_time - datetime.timedelta(hours=1)
-
-    formatted_current_time = current_time.strftime("%Y-%m-%d %H:%M:%S")
-    formatted_one_hour_ago = one_hour_ago.strftime("%Y-%m-%d %H:%M:%S")
-
-    max_bike_distance = config_data["max_bike_distance"]
-    max_bike_temp = config_data["max_bike_temp"]
-    min_bike_temp = config_data["min_bike_temp"]
-
-    time_data_db = get_time_from_db()
-
-    if not time_data_db >= formatted_one_hour_ago:
-        response_data = api_response(formatted_current_time, max_bike_distance, max_bike_temp, min_bike_temp,
-                                     config_data)
-    else:
-        response_data = db_response(max_bike_distance, max_bike_temp, min_bike_temp, config_data)
-
     return response_data
 
 
