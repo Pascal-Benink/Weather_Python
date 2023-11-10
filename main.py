@@ -125,8 +125,7 @@ def get_weather_from_db():
 
 
 def api_response(formatted_current_time, max_bike_distance, max_bike_temp, min_bike_temp, config_data):
-    ip = get_ip
-
+    ip = get_ip()
 
     location_data = get_location_from_ip_api(ip, api_key, api_url_base)
 
@@ -137,7 +136,6 @@ def api_response(formatted_current_time, max_bike_distance, max_bike_temp, min_b
     else:
         print("No Location data found App will now shut down")
         exit()
-
 
     create_tables()
 
