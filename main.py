@@ -80,15 +80,17 @@ def get_weather_from_location_api(location_key, api_key, api_url_base):
         conditions_response = requests.get(conditions_url, params=conditions_params)
     except requests.exceptions.HTTPError as ce:
         print(f"Connection Problem: {ce}")
-        return [{"WeatherText": "No Data", "WeatherIcon": 0,
-                 "Temperature": {"Metric": {"Value": 0, "Unit": "C", "UnitType": 17},
-                                 "Imperial": {"Value": 0, "Unit": "F", "UnitType": 18}}}]
+        exit()
+        # return [{"WeatherText": "No Data", "WeatherIcon": 0,
+        #          "Temperature": {"Metric": {"Value": 0, "Unit": "C", "UnitType": 17},
+        #                          "Imperial": {"Value": 0, "Unit": "F", "UnitType": 18}}}]
 
     try:
         conditions_data = conditions_response.json()
     except json.JSONDecodeError as je:
         print(f"json decode error: {je}")
-        return [{"WeatherText": "No Data", "WeatherIcon": 0, "Temperature": {"Metric": {"Value": 0, "Unit": "C", "UnitType": 17}, "Imperial": {"Value": 0, "Unit": "F", "UnitType": 18}}}]
+        exit()
+        # return [{"WeatherText": "No Data", "WeatherIcon": 0, "Temperature": {"Metric": {"Value": 0, "Unit": "C", "UnitType": 17}, "Imperial": {"Value": 0, "Unit": "F", "UnitType": 18}}}]
     return conditions_data
 
 
@@ -117,7 +119,8 @@ def get_weather_from_db():
             )
         except Exception as e:
             print(f"Error: {e}")
-            return [{"weather": "No data", "icon": 0, "temperature": 0, "latitude": 0, "longitude": 0, "saved_at": "1970-01-01 00:00:00"}]
+            exit()
+            # return [{"weather": "No data", "icon": 0, "temperature": 0, "latitude": 0, "longitude": 0, "saved_at": "1970-01-01 00:00:00"}]
         return data
 
 
@@ -144,52 +147,52 @@ def api_response(formatted_current_time, max_bike_distance, max_bike_temp, min_b
         current_temprature = conditions_data[0]['Temperature']['Metric']['Value']
         lat = location_data[0]['GeoPosition']['Latitude']
         lon = location_data[0]['GeoPosition']['Longitude']
+
+        try:
+            current_float_temp = float(current_temprature)
+        except ValueError as ve:
+            print(f"There has been a error wih type change Error: {ve}")
+            current_float_temp = 0.0
+        try:
+            max_bike_temp = float(max_bike_temp)
+        except ValueError as ve:
+            print(f"There has been a error wih type change Error: {ve}")
+            max_bike_temp = 0.0
+        try:
+            min_bike_temp = float(min_bike_temp)
+        except ValueError as ve:
+            print(f"There has been a error wih type change Error: {ve}")
+            min_bike_temp = 0.0
+
+        distance = config_data["bike_distance"]
+
+        temp = check_temprature(current_float_temp, max_bike_temp, min_bike_temp)
+        bike_distance = check_bike_distance(distance, max_bike_distance)
+
+        response_data = {
+            "temperature": current_temprature,
+            "weather": current_weather,
+            "icon": current_weather_icon,
+            "bikeable": check_bike(temp, bike_distance),
+            "latitude": lat,
+            "longitude": lon,
+            "saved_at": formatted_current_time,
+        }
+        insertable = {
+            "temperature": current_temprature,
+            "weather": current_weather,
+            "icon": current_weather_icon,
+            "latitude": lat,
+            "longitude": lon,
+            "saved_at": formatted_current_time,
+        }
+        insertdata(insertable)
     else:
-        current_weather = None
-        current_weather_icon = None
-        current_temprature = None
-        lat = None
-        lon = None
+        response_data = {
+            "data": "Not found"
+        }
 
-    try:
-        current_float_temp = float(current_temprature)
-    except ValueError as ve:
-        print(f"There has been a error wih type change Error: {ve}")
-        current_float_temp = 0.0
-    try:
-        max_bike_temp = float(max_bike_temp)
-    except ValueError as ve:
-        print(f"There has been a error wih type change Error: {ve}")
-        max_bike_temp = 0.0
-    try:
-        min_bike_temp = float(min_bike_temp)
-    except ValueError as ve:
-        print(f"There has been a error wih type change Error: {ve}")
-        min_bike_temp = 0.0
 
-    distance = config_data["bike_distance"]
-
-    temp = check_temprature(current_float_temp, max_bike_temp, min_bike_temp)
-    bike_distance = check_bike_distance(distance, max_bike_distance)
-
-    response_data = {
-        "temperature": current_temprature,
-        "weather": current_weather,
-        "icon": current_weather_icon,
-        "bikeable": check_bike(temp, bike_distance),
-        "latitude": lat,
-        "longitude": lon,
-        "saved_at": formatted_current_time,
-    }
-    insertable = {
-        "temperature": current_temprature,
-        "weather": current_weather,
-        "icon": current_weather_icon,
-        "latitude": lat,
-        "longitude": lon,
-        "saved_at": formatted_current_time,
-    }
-    insertdata(insertable)
 
     return response_data
 
@@ -205,46 +208,44 @@ def db_response(max_bike_distance, max_bike_temp, min_bike_temp, config_data):
         lat = conditions_data[0]['latitude']
         lon = conditions_data[0]['longitude']
         saved_at = conditions_data[0]['saved_at']
+        try:
+            current_float_temp = float(current_temprature)
+        except ValueError as ve:
+            print(f"There has been a error wih type change Error: {ve}")
+            current_float_temp = 0.0
+        try:
+            max_bike_temp = float(max_bike_temp)
+        except ValueError as ve:
+            print(f"There has been a error wih type change Error: {ve}")
+            max_bike_temp = 0.0
+        try:
+            min_bike_temp = float(min_bike_temp)
+        except ValueError as ve:
+            print(f"There has been a error wih type change Error: {ve}")
+            min_bike_temp = 0.0
+
+        distance = config_data["bike_distance"]
+
+        temp = check_temprature(current_float_temp, max_bike_temp, min_bike_temp)
+        bike_distance = check_bike_distance(distance, max_bike_distance)
+
+        response_data = {
+            "temperature": current_temprature,
+            "weather": current_weather,
+            "icon": current_weather_icon,
+            "bikeable": check_bike(temp, bike_distance),
+            "latitude": lat,
+            "longitude": lon,
+            "saved_at": saved_at,
+        }
 
     else:
         # No data found
-        current_weather = "No data"
-        current_weather_icon = 0
-        current_temprature = 0
-        lat = 0
-        lon = 0
-        saved_at = '1970-01-01 00:00:00'
+        response_data = {
+            "data": "Not found"
+        }
 
-    try:
-        current_float_temp = float(current_temprature)
-    except ValueError as ve:
-        print(f"There has been a error wih type change Error: {ve}")
-        current_float_temp = 0.0
-    try:
-        max_bike_temp = float(max_bike_temp)
-    except ValueError as ve:
-        print(f"There has been a error wih type change Error: {ve}")
-        max_bike_temp = 0.0
-    try:
-        min_bike_temp = float(min_bike_temp)
-    except ValueError as ve:
-        print(f"There has been a error wih type change Error: {ve}")
-        min_bike_temp = 0.0
 
-    distance = config_data["bike_distance"]
-
-    temp = check_temprature(current_float_temp, max_bike_temp, min_bike_temp)
-    bike_distance = check_bike_distance(distance, max_bike_distance)
-
-    response_data = {
-        "temperature": current_temprature,
-        "weather": current_weather,
-        "icon": current_weather_icon,
-        "bikeable": check_bike(temp, bike_distance),
-        "latitude": lat,
-        "longitude": lon,
-        "saved_at": saved_at,
-    }
     return response_data
 
 
