@@ -59,7 +59,14 @@ def get_location_from_ip_api(ip, api_key, api_url_base):
     except requests.exceptions.HTTPError as ce:
         print(f"Connection Problem Shuttng down app: {ce}")
         exit()
-    location_data_unformatted = response.json()
+    except Exception as e:
+        print(f"Error shutting down: {e}")
+        exit()
+    try:
+        location_data_unformatted = response.json()
+    except json.JSONDecodeError as je:
+        print(f"json decode error Shuttng down: {je}")
+        exit()
     return [location_data_unformatted]
 
 
@@ -123,7 +130,8 @@ def api_response(formatted_current_time, max_bike_distance, max_bike_temp, min_b
 
         conditions_data = get_weather_from_location_api(location_key, api_key, api_url_base)
     else:
-        conditions_data = [{"WeatherText": "No dta", "WeatherIcon": 0, "Temperature": {"Metric": {"Value": 0, "Unit": "C", "UnitType": 17}, "Imperial": {"Value": 0, "Unit": "F", "UnitType": 18}}}]
+        print("No Location data found App will now shut down")
+        exit()
 
 
     create_tables()
@@ -135,11 +143,11 @@ def api_response(formatted_current_time, max_bike_distance, max_bike_temp, min_b
         lat = location_data[0]['GeoPosition']['Latitude']
         lon = location_data[0]['GeoPosition']['Longitude']
     else:
-        current_weather = 0
-        current_weather_icon = 0
-        current_temprature = 0
-        lat = 0
-        lon = 0
+        current_weather = None
+        current_weather_icon = None
+        current_temprature = None
+        lat = None
+        lon = None
 
     try:
         current_float_temp = float(current_temprature)
@@ -239,42 +247,53 @@ def db_response(max_bike_distance, max_bike_temp, min_bike_temp, config_data):
 
 
 def check_tabel_existence():
-    sql_client.check_table_exists("weather_table")
+    try:
+        sql_client.check_table_exists("weather_table")
+    except Exception as e:
+        print(f"Error with checking table App now shutting down: {e}")
+        exit()
 
 
 def create_tables():
     weather_table = "weather_table"
 
-    # Check if weather table exists
-    if not sql_client.check_table_exists(weather_table):
-        # Create weather table if it doesn't exist
-        create_weather_table_query = """
-            CREATE TABLE weather_table (
-                id INT AUTO_INCREMENT PRIMARY KEY,
-                weather VARCHAR(255) NOT NULL,
-                icon INT NOT NULL,
-                temperature FLOAT NOT NULL,
-                latitude FLOAT NOT NULL,
-                longitude FLOAT NOT NULL,
-                saved_at VARCHAR(255) NOT NULL
-            );"""
-        sql_client.query_fix(create_weather_table_query)
+    try:
+        # Check if weather table exists
+        if not sql_client.check_table_exists(weather_table):
+            # Create weather table if it doesn't exist
+            create_weather_table_query = """
+                CREATE TABLE weather_table (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    weather VARCHAR(255) NOT NULL,
+                    icon INT NOT NULL,
+                    temperature FLOAT NOT NULL,
+                    latitude FLOAT NOT NULL,
+                    longitude FLOAT NOT NULL,
+                    saved_at VARCHAR(255) NOT NULL
+                );"""
+            sql_client.query_fix(create_weather_table_query)
+    except Exception as e:
+        print(f"Error with creating table App now shutting down: {e}")
+        exit()
 
 
 def insertdata(insertable):
-    weather = insertable.get("weather")
-    Icon = insertable.get("icon")
-    temperature = insertable.get("temperature")
-    latitude = insertable.get("latitude")
-    longitude = insertable.get("longitude")
-    saved_at = insertable.get("saved_at")
+    try:
+        weather = insertable.get("weather")
+        Icon = insertable.get("icon")
+        temperature = insertable.get("temperature")
+        latitude = insertable.get("latitude")
+        longitude = insertable.get("longitude")
+        saved_at = insertable.get("saved_at")
 
-    keys = ["weather", "icon", "temperature", "latitude", "longitude", "saved_at"]
-    keys = tuple(keys)
-    values = [weather, Icon, temperature, latitude, longitude, saved_at]
-    values = tuple(values)
-    table_name = "weather_table"
-    sql_client.insert(keys, values, table_name)
+        keys = ["weather", "icon", "temperature", "latitude", "longitude", "saved_at"]
+        keys = tuple(keys)
+        values = [weather, Icon, temperature, latitude, longitude, saved_at]
+        values = tuple(values)
+        table_name = "weather_table"
+        sql_client.insert(keys, values, table_name)
+    except Exception as e:
+        print(f"Error with Inserting data for table App now shutting down: {e}")
 
 
 def check_temprature(current_temprature, max_temprature, min_temprature):
