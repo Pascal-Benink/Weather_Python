@@ -123,7 +123,7 @@ def api_response(formatted_current_time, max_bike_distance, max_bike_temp, min_b
 
         conditions_data = get_weather_from_location_api(location_key, api_key, api_url_base)
     else:
-        conditions_data = [{"WeatherText": "Light rain", "WeatherIcon": 12, "Temperature": {"Metric": {"Value": 11.1, "Unit": "C", "UnitType": 17}, "Imperial": {"Value": 52.0, "Unit": "F", "UnitType": 18}}}]
+        conditions_data = [{"WeatherText": "No dta", "WeatherIcon": 0, "Temperature": {"Metric": {"Value": 0, "Unit": "C", "UnitType": 17}, "Imperial": {"Value": 0, "Unit": "F", "UnitType": 18}}}]
 
 
     create_tables()
@@ -143,12 +143,18 @@ def api_response(formatted_current_time, max_bike_distance, max_bike_temp, min_b
 
     try:
         current_float_temp = float(current_temprature)
-        max_bike_temp = float(max_bike_temp)
-        min_bike_temp = float(min_bike_temp)
     except ValueError as ve:
         print(f"There has been a error wih type change Error: {ve}")
         current_float_temp = 0.0
+    try:
+        max_bike_temp = float(max_bike_temp)
+    except ValueError as ve:
+        print(f"There has been a error wih type change Error: {ve}")
         max_bike_temp = 0.0
+    try:
+        min_bike_temp = float(min_bike_temp)
+    except ValueError as ve:
+        print(f"There has been a error wih type change Error: {ve}")
         min_bike_temp = 0.0
 
     distance = config_data["bike_distance"]
@@ -201,12 +207,18 @@ def db_response(max_bike_distance, max_bike_temp, min_bike_temp, config_data):
 
     try:
         current_float_temp = float(current_temprature)
-        max_bike_temp = float(max_bike_temp)
-        min_bike_temp = float(min_bike_temp)
     except ValueError as ve:
         print(f"There has been a error wih type change Error: {ve}")
         current_float_temp = 0.0
+    try:
+        max_bike_temp = float(max_bike_temp)
+    except ValueError as ve:
+        print(f"There has been a error wih type change Error: {ve}")
         max_bike_temp = 0.0
+    try:
+        min_bike_temp = float(min_bike_temp)
+    except ValueError as ve:
+        print(f"There has been a error wih type change Error: {ve}")
         min_bike_temp = 0.0
 
     distance = config_data["bike_distance"]
