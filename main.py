@@ -101,7 +101,9 @@ def get_time_from_db():
             )
             time = time[0]
         except Exception as e:
-            print(f"Error: {e}")
+            print(f"Error Shutting down: {e}")
+            exit()
+
         return time['saved_at']
     else:
         return "1970-01-01 00:00:00"
