@@ -46,7 +46,8 @@ def get_ip():
     try:
         ip = get('https://api.ipify.org').content.decode('utf8')
     except requests.exceptions.HTTPError as ce:
-        print(f"Connection Problem: {ce}")
+        print(f"Connection Problem Shuttng down: {ce}")
+        exit()
     return ip
 
 
@@ -56,7 +57,8 @@ def get_location_from_ip_api(ip, api_key, api_url_base):
     try:
         response = requests.get(url)
     except requests.exceptions.HTTPError as ce:
-        print(f"Connection Problem: {ce}")
+        print(f"Connection Problem Shuttng down app: {ce}")
+        exit()
     location_data_unformatted = response.json()
     return [location_data_unformatted]
 
@@ -68,18 +70,27 @@ def get_weather_from_location_api(location_key, api_key, api_url_base):
     }
 
     try:
-        conditionsResponse = requests.get(conditions_url, params=conditions_params)
+        conditions_response = requests.get(conditions_url, params=conditions_params)
     except requests.exceptions.HTTPError as ce:
         print(f"Connection Problem: {ce}")
+        return [{"WeatherText": "No Data", "WeatherIcon": 0,
+                 "Temperature": {"Metric": {"Value": 0, "Unit": "C", "UnitType": 17},
+                                 "Imperial": {"Value": 0, "Unit": "F", "UnitType": 18}}}]
 
-    return conditionsResponse.json()
+    try:
+        conditions_data = conditions_response.json()
+    except json.JSONDecodeError as je:
+        print(f"json decode error: {je}")
+        return [{"WeatherText": "No Data", "WeatherIcon": 0, "Temperature": {"Metric": {"Value": 0, "Unit": "C", "UnitType": 17}, "Imperial": {"Value": 0, "Unit": "F", "UnitType": 18}}}]
+    return conditions_data
+
 
 
 def get_time_from_db():
     if sql_client.check_table_exists("weather_table"):
         try:
             time = sql_client.fetch_all(
-                "SELECT saved_at FROM weather_table WHERE `id` = (SELECT MAX(`id`) FROM weather_table);"
+                "SELECT saved_at FROM weather_table ORDER BY saved_at DESC LIMIT 1;"
             )
             time = time[0]
         except Exception as e:
@@ -93,33 +104,52 @@ def get_weather_from_db():
     if check_tabel_existence:
         try:
             data = sql_client.fetch_all(
-                "SELECT * FROM weather_table WHERE `id` = (SELECT MAX(`id`) FROM weather_table);"
+                "SELECT * FROM weather_table ORDER BY saved_at DESC LIMIT 1;"
             )
         except Exception as e:
             print(f"Error: {e}")
+            return [{"weather": "No data", "icon": 0, "temperature": 0, "latitude": 0, "longitude": 0, "saved_at": "1970-01-01 00:00:00"}]
         return data
 
 
 def api_response(formatted_current_time, max_bike_distance, max_bike_temp, min_bike_temp, config_data):
     ip = get_ip
 
+
     location_data = get_location_from_ip_api(ip, api_key, api_url_base)
 
-    location_key = location_data[0]['Key']
+    if location_data:
+        location_key = location_data[0]['Key']
 
-    conditions_data = get_weather_from_location_api(location_key, api_key, api_url_base)
+        conditions_data = get_weather_from_location_api(location_key, api_key, api_url_base)
+    else:
+        conditions_data = [{"WeatherText": "Light rain", "WeatherIcon": 12, "Temperature": {"Metric": {"Value": 11.1, "Unit": "C", "UnitType": 17}, "Imperial": {"Value": 52.0, "Unit": "F", "UnitType": 18}}}]
+
 
     create_tables()
 
-    current_weather = conditions_data[0]['WeatherText']
-    current_weather_icon = conditions_data[0]['WeatherIcon']
-    current_temprature = conditions_data[0]['Temperature']['Metric']['Value']
-    lat = location_data[0]['GeoPosition']['Latitude']
-    lon = location_data[0]['GeoPosition']['Longitude']
-    current_float_temp = float(current_temprature)
+    if conditions_data and location_data:
+        current_weather = conditions_data[0]['WeatherText']
+        current_weather_icon = conditions_data[0]['WeatherIcon']
+        current_temprature = conditions_data[0]['Temperature']['Metric']['Value']
+        lat = location_data[0]['GeoPosition']['Latitude']
+        lon = location_data[0]['GeoPosition']['Longitude']
+    else:
+        current_weather = 0
+        current_weather_icon = 0
+        current_temprature = 0
+        lat = 0
+        lon = 0
 
-    max_bike_temp = float(max_bike_temp)
-    min_bike_temp = float(min_bike_temp)
+    try:
+        current_float_temp = float(current_temprature)
+        max_bike_temp = float(max_bike_temp)
+        min_bike_temp = float(min_bike_temp)
+    except ValueError as ve:
+        print(f"There has been a error wih type change Error: {ve}")
+        current_float_temp = 0.0
+        max_bike_temp = 0.0
+        min_bike_temp = 0.0
 
     distance = config_data["bike_distance"]
 
@@ -151,16 +181,33 @@ def api_response(formatted_current_time, max_bike_distance, max_bike_temp, min_b
 def db_response(max_bike_distance, max_bike_temp, min_bike_temp, config_data):
     conditions_data = get_weather_from_db()
 
-    current_weather = conditions_data[0]['weather']
-    current_weather_icon = conditions_data[0]['icon']
-    current_temprature = conditions_data[0]['temperature']
-    lat = conditions_data[0]['latitude']
-    lon = conditions_data[0]['longitude']
-    saved_at = conditions_data[0]['saved_at']
-    current_float_temp = float(current_temprature)
+    if conditions_data:
+        # Data exists
+        current_weather = conditions_data[0]['weather']
+        current_weather_icon = conditions_data[0]['icon']
+        current_temprature = conditions_data[0]['temperature']
+        lat = conditions_data[0]['latitude']
+        lon = conditions_data[0]['longitude']
+        saved_at = conditions_data[0]['saved_at']
 
-    max_bike_temp = float(max_bike_temp)
-    min_bike_temp = float(min_bike_temp)
+    else:
+        # No data found
+        current_weather = "No data"
+        current_weather_icon = 0
+        current_temprature = 0
+        lat = 0
+        lon = 0
+        saved_at = '1970-01-01 00:00:00'
+
+    try:
+        current_float_temp = float(current_temprature)
+        max_bike_temp = float(max_bike_temp)
+        min_bike_temp = float(min_bike_temp)
+    except ValueError as ve:
+        print(f"There has been a error wih type change Error: {ve}")
+        current_float_temp = 0.0
+        max_bike_temp = 0.0
+        min_bike_temp = 0.0
 
     distance = config_data["bike_distance"]
 
@@ -219,32 +266,15 @@ def insertdata(insertable):
 
 
 def check_temprature(current_temprature, max_temprature, min_temprature):
-    if current_temprature >= min_temprature:
-        min_temprature_check = True
-    else:
-        min_temprature_check = False
-
-    if current_temprature <= max_temprature:
-        max_temprature_check = True
-    else:
-        max_temprature_check = False
-
-    return max_temprature_check and min_temprature_check
+    return current_temprature >= min_temprature and current_temprature <= max_temprature
 
 
 def check_bike_distance(distance, max_bike_distance):
-    if distance <= max_bike_distance:
-        return True
-    else:
-        return False
+    return distance <= max_bike_distance
 
 
 def check_bike(temp, distance):
-    if temp and distance:
-        return True
-    else:
-        return False
-
+    return temp and distance
 
 
 if __name__ == '__main__':

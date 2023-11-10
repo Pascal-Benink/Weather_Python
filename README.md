@@ -22,5 +22,29 @@ The app uses the following api routes:
 /locations/v1/cities/ipaddress to check if at the location of your ipaddress the weather is bikeable by your standards.
 /currentconditions/v1/ to see if the water is bikeale at the location above
 
+## Env explanation
+there are 2 API_URL places
+1. API_URL=http://dataservice.accuweather.com/ this one is from the external accuweather api (the real service i use)
+2. API_URL=http://127.0.0.1:8000 this one is the mack api fo if you run out of requests.
+3. API_KEY is the place where you need put the api key for accuweather.
+\
+MYSQL_HOST=localhost
+MYSQL_USER=mysql
+MYSQL_PASSWORD=mysql
+MYSQL_DATABASE=api
+MYSQL_PORT=3307
+MYSQL_CONNECTION_TIMEOUT=180
+these are for the database only change them if you know what you are doing sice this is also for running the database locally via docker
+
 ## Connections
 you can connect to the api via:http://127.0.0.1:5000/
+form the response you can expect data in the structure of:
+{
+"bikeable": true,
+"icon": 12,
+"latitude": 52.35,
+"longitude": 4.922,
+"saved_at": "2023-11-10 10:16:55",
+"temperature": 11.1,
+"weather": "Light rain"
+}
