@@ -113,10 +113,10 @@ def api_response(formatted_current_time, max_bike_distance, max_bike_temp, min_b
 
     current_weather = conditions_data[0]['WeatherText']
     current_weather_icon = conditions_data[0]['WeatherIcon']
-    current_temp = conditions_data[0]['Temperature']['Metric']['Value']
+    current_temprature = conditions_data[0]['Temperature']['Metric']['Value']
     lat = location_data[0]['GeoPosition']['Latitude']
     lon = location_data[0]['GeoPosition']['Longitude']
-    current_float_temp = float(current_temp)
+    current_float_temp = float(current_temprature)
 
     max_bike_temp = float(max_bike_temp)
     min_bike_temp = float(min_bike_temp)
@@ -127,7 +127,7 @@ def api_response(formatted_current_time, max_bike_distance, max_bike_temp, min_b
     bike_distance = check_bike_distance(distance, max_bike_distance)
 
     response_data = {
-        "temperature": current_temp,
+        "temperature": current_temprature,
         "weather": current_weather,
         "icon": current_weather_icon,
         "bikeable": check_bike(temp, bike_distance),
@@ -136,7 +136,7 @@ def api_response(formatted_current_time, max_bike_distance, max_bike_temp, min_b
         "saved_at": formatted_current_time,
     }
     insertable = {
-        "temperature": current_temp,
+        "temperature": current_temprature,
         "weather": current_weather,
         "icon": current_weather_icon,
         "latitude": lat,
@@ -153,11 +153,11 @@ def db_response(max_bike_distance, max_bike_temp, min_bike_temp, config_data):
 
     current_weather = conditions_data[0]['weather']
     current_weather_icon = conditions_data[0]['icon']
-    current_temp = conditions_data[0]['temperature']
+    current_temprature = conditions_data[0]['temperature']
     lat = conditions_data[0]['latitude']
     lon = conditions_data[0]['longitude']
     saved_at = conditions_data[0]['saved_at']
-    current_float_temp = float(current_temp)
+    current_float_temp = float(current_temprature)
 
     max_bike_temp = float(max_bike_temp)
     min_bike_temp = float(min_bike_temp)
@@ -168,7 +168,7 @@ def db_response(max_bike_distance, max_bike_temp, min_bike_temp, config_data):
     bike_distance = check_bike_distance(distance, max_bike_distance)
 
     response_data = {
-        "temperature": current_temp,
+        "temperature": current_temprature,
         "weather": current_weather,
         "icon": current_weather_icon,
         "bikeable": check_bike(temp, bike_distance),
@@ -218,18 +218,18 @@ def insertdata(insertable):
     sql_client.insert(keys, values, table_name)
 
 
-def check_temprature(current_temp, maxtemp, mintemp):
-    if current_temp >= mintemp:
-        mintemp_chk = True
+def check_temprature(current_temprature, max_temprature, min_temprature):
+    if current_temprature >= min_temprature:
+        min_temprature_check = True
     else:
-        mintemp_chk = False
+        min_temprature_check = False
 
-    if current_temp <= maxtemp:
-        maxtemp_chk = True
+    if current_temprature <= max_temprature:
+        max_temprature_check = True
     else:
-        maxtemp_chk = False
+        max_temprature_check = False
 
-    return maxtemp_chk and mintemp_chk
+    return max_temprature_check and min_temprature_check
 
 
 def check_bike_distance(distance, max_bike_distance):
