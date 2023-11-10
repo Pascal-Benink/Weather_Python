@@ -4,7 +4,7 @@ import os
 from dotenv import load_dotenv
 import requests
 from requests import get
-from flask import Flask, jsonify
+from flask import Flask
 
 from sql_client import SQLClient
 
@@ -81,7 +81,7 @@ def get_time_from_db():
             time = sql_client.fetch_all(
                 "SELECT saved_at FROM weather_table WHERE `id` = (SELECT MAX(`id`) FROM weather_table);"
             )
-            time = time[0]  # Assuming there's only one dictionary in the list
+            time = time[0]
         except Exception as e:
             print(f"Error: {e}")
         return time['saved_at']
